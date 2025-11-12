@@ -11,8 +11,9 @@
   --color-shop_light_green: #3b9c3c;
   --color-shop_orange: #fb6c08;
   --color-darkColor: #151515;
-  --color-lightColor: #151515;
+  --color-lightColor: #505058;
   --color-lightOrange: #fca99b;
+  --color-redColor: #880808;
 }
 
 @theme inline {
@@ -128,5 +129,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .hoverEffect {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  button{
+    @apply hover:cursor-pointer;
   }
 }
