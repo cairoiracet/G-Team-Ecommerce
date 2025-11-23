@@ -4,16 +4,16 @@ import React, { useState } from "react";
 import SideMenu from "./SideMenu";
 
 const MobileMenu = () => {
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setIsSideMenuOpen(!isSideMenuOpen)}>
+      <button onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
         <AlignLeft className="hover:text-darkColor hoverEffect md:hidden hover:cursor-pointer" />
       </button>
       <div className="md:hidden">
         <SideMenu
-          isOpen={isSideMenuOpen}
-          onClose={() => setIsSideMenuOpen(false)}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
       </div>
     </>

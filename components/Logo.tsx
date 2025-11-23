@@ -2,17 +2,28 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
 
-const Logo = ({ className, spanDesign }: { className?: string, spanDesign?:string }) => {
+const Logo = ({
+  className,
+  spanDesign,
+}: {
+  className?: string;
+  spanDesign?: string;
+}) => {
   return (
-  <Link href="/" className="group">
+    <Link href={"/"} className="inline-flex">
       <h2
         className={cn(
-          "text-2xl text-redColor font-black tracking-wider uppercase hover:text-black hoverEffect",
+          "text-2xl text-shop_dark_green font-black tracking-wider uppercase hover:text-shop_light_green hoverEffect group font-sans",
           className
         )}
       >
-        G-Team
-        <span className={cn("text-black group-hover:text-redColor hoverEffect pl-2xt-lg ml-1 font-semibold", spanDesign)}>
+        GTeam
+        <span
+          className={cn(
+            "text-shop_light_green group-hover:text-shop_dark_green hoverEffect",
+            spanDesign
+          )}
+        >
           Store
         </span>
       </h2>

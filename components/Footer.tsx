@@ -3,7 +3,7 @@ import Container from "./Container";
 import FooterTop from "./FooterTop";
 import Logo from "./Logo";
 import { SubText, SubTitle } from "./ui/text";
-import Link from "next/link";
+import { categoriesData } from "@/constants/data";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
@@ -16,27 +16,27 @@ const Footer = () => {
           <div className="space-y-4">
             <Logo />
             <SubText>
-             Descubra a GTeam Store, sua loja online de confiança para produtos
-             de alta qualidade. Oferecemos uma ampla variedade de camisas para
-             atender todas as suas necessidades. Compre com segurança e
-             conveniência na GTeam Store!
+              Descubra coleções de camisas selecionadas na GTeam Store, combinando
+              estilo e conforto para elevar seus espaços de vida.
             </SubText>
           </div>
-          <div className="space-y-4 ">
-            <SubTitle>Novidades</SubTitle>
+
+          <div className="space-y-4">
+            <SubTitle>Newsletter</SubTitle>
             <SubText>
-              Se inscreva para receber as últimas atualizações e ofertas
-              especiais.
+              Inscreva-se em nossa newsletter para receber atualizações e ofertas
+              exclusivas
             </SubText>
             <form className="space-y-3">
-              <Input placeholder="Seu Email" type="email" required />
+              <Input placeholder="Digite seu e-mail" type="email" required />
               <Button className="w-full">Inscrever-se</Button>
             </form>
           </div>
         </div>
         <div className="py-6 border-t text-center text-sm text-gray-600">
           <div>
-            © {new Date().getFullYear()} <Logo className="text-sm" /> Todos os Direitos.
+            © {new Date().getFullYear()} <Logo className="text-sm" />. Todos
+            os direitos reservados.
           </div>
         </div>
       </Container>

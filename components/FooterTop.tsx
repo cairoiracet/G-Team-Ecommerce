@@ -16,22 +16,22 @@ const data: ContactItemData[] = [
     ),
   },
   {
-    title: "Contate-nos",
-    subtitle: "+51 987654321",
+    title: "Ligue para nós",
+    subtitle: "+51 958 648 597",
     icon: (
       <Phone className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
     ),
   },
   {
-    title: "Horário de Atendimento",
-    subtitle: "Seg - Sex: 10:00 - 19:00 ",
+    title: "Horário de Funcionamento",
+    subtitle: "Seg - Sab: 10:00 - 19:00 ",
     icon: (
       <Clock className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
     ),
   },
   {
-    title: "Nosso Email",
-    subtitle: "gteamstore@gmail.com",
+    title: "Envie-nos um e-mail",
+    subtitle: "support@gteamstore.com",
     icon: (
       <Mail className="h-6 w-6 text-gray-600 group-hover:text-primary transition-colors" />
     ),
