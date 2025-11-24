@@ -48,12 +48,6 @@ nvm install 25
 nvm use 25
 ```
 
-Tornar o Node 25 a versão padrão:
-
-```bash
-nvm alias default 25
-```
-
 ## ▶️ **Rodando o Projeto em Ambiente de Desenvolvimento**
 
 Após garantir que está utilizando **Node 25**, execute:
