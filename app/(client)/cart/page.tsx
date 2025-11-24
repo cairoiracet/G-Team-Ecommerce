@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  createCheckoutSession,
-  Metadata,
-} from "@/actions/createCheckoutSession";
+import { createMercadoPagoCheckout } from "@/actions/mercadopago";
 import Container from "@/components/Container";
 import EmptyCart from "@/components/EmptyCart";
 import NoAccess from "@/components/NoAccess";
@@ -12,9 +9,6 @@ import ProductSideMenu from "@/components/ProductSideMenu";
 import QuantityButtons from "@/components/QuantityButtons";
 import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -22,15 +16,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Address } from "@/sanity.types";
-import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import useStore from "@/store";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ShoppingBag, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 const CartPage = () => {
@@ -45,60 +37,48 @@ const CartPage = () => {
   const groupedItems = useStore((state) => state.getGroupedItems());
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const [addresses, setAddresses] = useState<Address[] | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
-  const fetchAddresses = async () => {
-    setLoading(true);
-    try {
-      const query = `*[_type=="address"] | order(publishedAt desc)`;
-      const data = await client.fetch(query);
-      setAddresses(data);
-      const defaultAddress = data.find((addr: Address) => addr.default);
-      if (defaultAddress) {
-        setSelectedAddress(defaultAddress);
-      } else if (data.length > 0) {
-        setSelectedAddress(data[0]); // Optional: select first address if no default
-      }
-    } catch (error) {
-      console.log("Addresses fetching error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
   const handleResetCart = () => {
     const confirmed = window.confirm(
-      "Are you sure you want to reset your cart?"
+      "Tem certeza que deseja limpar o carrinho?"
     );
     if (confirmed) {
       resetCart();
-      toast.success("Cart reset successfully!");
+      toast.success("Carrinho limpo com sucesso!");
     }
   };
 
   const handleCheckout = async () => {
+    if (groupedItems.length === 0) {
+      toast.error("Seu carrinho está vazio");
+      return;
+    }
+
     setLoading(true);
     try {
-      const metadata: Metadata = {
-        orderNumber: crypto.randomUUID(),
-        customerName: user?.fullName ?? "Unknown",
-        customerEmail: user?.emailAddresses[0]?.emailAddress ?? "Unknown",
+      const metadata = {
+        orderNumber: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        customerName: user?.fullName ?? "Cliente",
+        customerEmail: user?.emailAddresses[0]?.emailAddress ?? "cliente@email.com",
         clerkUserId: user?.id,
-        address: selectedAddress,
       };
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
+
+      const checkoutUrl = await createMercadoPagoCheckout(groupedItems, metadata);
+      
       if (checkoutUrl) {
+        // Redirecionar para o checkout do MercadoPago
         window.location.href = checkoutUrl;
+      } else {
+        throw new Error("Não foi possível gerar o link de pagamento");
       }
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      console.error("Erro ao criar sessão de checkout:", error);
+      toast.error("Erro ao processar pagamento. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="bg-gray-50 pb-52 md:pb-10">
       {isSignedIn ? (
@@ -123,8 +103,7 @@ const CartPage = () => {
                             {product?.images && (
                               <Link
                                 href={`/product/${product?.slug?.current}`}
-                                className="border p-0.5 md:p-1 mr-2 rounded-md
-                                 overflow-hidden group"
+                                className="border p-0.5 md:p-1 mr-2 rounded-md overflow-hidden group"
                               >
                                 <Image
                                   src={urlFor(product?.images[0]).url()}
@@ -230,65 +209,39 @@ const CartPage = () => {
                           />
                         </div>
                         <Button
-                          className="w-full rounded-full font-semibold tracking-wide hoverEffect"
+                          className="w-full rounded-full font-semibold tracking-wide hoverEffect bg-green-600 hover:bg-green-700"
                           size="lg"
                           disabled={loading}
                           onClick={handleCheckout}
                         >
-                          {loading ? "Aguarde..." : "Finalizar Compra"}
+                          {loading ? (
+                            <span className="flex items-center justify-center">
+                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Processando...
+                            </span>
+                          ) : (
+                            `Pagar R$ ${getTotalPrice().toFixed(2)}`
+                          )}
                         </Button>
+                        
+                        {/* Informações de segurança */}
+                        <div className="text-center text-sm text-gray-600 mt-4">
+                          <p>✅ Pagamento 100% seguro via MercadoPago</p>
+                          <p>🔒 Seus dados estão protegidos</p>
+                        </div>
                       </div>
                     </div>
-                    {addresses && (
-                      <div className="bg-white rounded-md mt-5">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Endereço de Entrega</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <RadioGroup
-                              defaultValue={addresses
-                                ?.find((addr) => addr.default)
-                                ?._id.toString()}
-                            >
-                              {addresses?.map((address) => (
-                                <div
-                                  key={address?._id}
-                                  onClick={() => setSelectedAddress(address)}
-                                  className={`flex items-center space-x-2 mb-4 cursor-pointer ${selectedAddress?._id === address?._id && "text-[#82181a]"}`}
-                                >
-                                  <RadioGroupItem
-                                    value={address?._id.toString()}
-                                  />
-                                  <Label
-                                    htmlFor={`address-${address?._id}`}
-                                    className="grid gap-1.5 flex-1"
-                                  >
-                                    <span className="font-semibold">
-                                      {address?.name}
-                                    </span>
-                                    <span className="text-sm text-black/60">
-                                      {address.address}, {address.city},{" "}
-                                      {address.state} {address.zip}
-                                    </span>
-                                  </Label>
-                                </div>
-                              ))}
-                            </RadioGroup>
-                            <Button variant="outline" className="w-full mt-4">
-                              Adicionar novo endereço
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )}
                   </div>
                 </div>
-                {/* Order summary for mobile view */}
-                <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2">
-                  <div className="bg-white p-4 rounded-lg border mx-4">
-                    <h2>Resumo do Pedido</h2>
-                    <div className="space-y-4">
+                
+                {/* Resumo do pedido para mobile */}
+                <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2 border-t">
+                  <div className="bg-white p-4 rounded-lg mx-4 mb-4">
+                    <h2 className="font-semibold mb-3">Resumo do Pedido</h2>
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span>Subtotal</span>
                         <PriceFormatter amount={getSubTotalPrice()} />
@@ -308,13 +261,29 @@ const CartPage = () => {
                         />
                       </div>
                       <Button
-                        className="w-full rounded-full font-semibold tracking-wide hoverEffect"
+                        className="w-full rounded-full font-semibold tracking-wide hoverEffect bg-green-600 hover:bg-green-700"
                         size="lg"
                         disabled={loading}
                         onClick={handleCheckout}
                       >
-                        {loading ? "Aguarde..." : "Finalizar Compra"}
+                        {loading ? (
+                          <span className="flex items-center justify-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processando...
+                          </span>
+                        ) : (
+                          `Pagar R$ ${getTotalPrice().toFixed(2)}`
+                        )}
                       </Button>
+                      
+                      {/* Informações de segurança mobile */}
+                      <div className="text-center text-xs text-gray-600 mt-2">
+                        <p>✅ Pagamento 100% seguro</p>
+                        <p>🔒 Dados protegidos</p>
+                      </div>
                     </div>
                   </div>
                 </div>
