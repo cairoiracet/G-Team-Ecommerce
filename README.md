@@ -25,6 +25,7 @@ Uma aplicação de e-commerce moderna construída com Next.js 15, React, TypeScr
 - Zustand (Gerenciamento de estado)
 
 ## Developement
+Nodejs >= 22
 ```
 npm install
 ```
