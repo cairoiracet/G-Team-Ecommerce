@@ -10,6 +10,15 @@ export interface Metadata {
   customerName: string;
   customerEmail: string;
   clerkUserId?: string;
+  address: {
+    street: string;
+    number: string;
+    complement?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
 }
 
 export interface GroupedCartItems {
@@ -53,16 +62,22 @@ export async function createMercadoPagoCheckout(
     console.log('Criando checkout MercadoPago:', {
       itemsCount: items.length,
       totalAmount,
-      customer: metadata.customerEmail
+      customer: metadata.customerEmail,
+      address: metadata.address
     });
 
-    // Criar preferência de pagamento usando a nova API
+    // Criar preferência de pagamento
     const response = await preferenceClient.create({
       body: {
         items: itemsMP,
         payer: {
           name: metadata.customerName,
           email: metadata.customerEmail,
+          address: {
+            street_name: metadata.address.street,
+            street_number: metadata.address.number,
+            zip_code: metadata.address.zipCode,
+          },
         },
         payment_methods: {
           excluded_payment_methods: [],
@@ -83,14 +98,14 @@ export async function createMercadoPagoCheckout(
           customer_name: metadata.customerName,
           customer_email: metadata.customerEmail,
           clerk_user_id: metadata.clerkUserId,
+          address: JSON.stringify(metadata.address),
         },
       }
     });
     
     console.log('Checkout criado com sucesso:', response.id);
-    console.log(response);
     
-    return response.sandbox_init_point;
+    return response.init_point;
   } catch (error) {
     console.error("Erro ao criar checkout MercadoPago:", error);
     throw new Error(`Falha ao processar pagamento: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);

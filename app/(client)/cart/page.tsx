@@ -24,6 +24,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { AddressForm, AddressData } from "@/components/address/address-form";
 
 const CartPage = () => {
   const {
@@ -34,6 +35,8 @@ const CartPage = () => {
     resetCart,
   } = useStore();
   const [loading, setLoading] = useState(false);
+  const [address, setAddress] = useState<AddressData | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const groupedItems = useStore((state) => state.getGroupedItems());
   const { isSignedIn } = useAuth();
   const { user } = useUser();
@@ -48,9 +51,21 @@ const CartPage = () => {
     }
   };
 
+  const handleAddressSubmit = (addressData: AddressData) => {
+    setAddress(addressData);
+    setShowAddressForm(false);
+    toast.success("Endereço salvo com sucesso!");
+  };
+
   const handleCheckout = async () => {
     if (groupedItems.length === 0) {
       toast.error("Seu carrinho está vazio");
+      return;
+    }
+
+    if (!address) {
+      toast.error("Por favor, adicione um endereço de entrega");
+      setShowAddressForm(true);
       return;
     }
 
@@ -61,12 +76,12 @@ const CartPage = () => {
         customerName: user?.fullName ?? "Cliente",
         customerEmail: user?.emailAddresses[0]?.emailAddress ?? "cliente@email.com",
         clerkUserId: user?.id,
+        address: address, // Incluindo o endereço no metadata
       };
 
       const checkoutUrl = await createMercadoPagoCheckout(groupedItems, metadata);
       
       if (checkoutUrl) {
-        // Redirecionar para o checkout do MercadoPago
         window.location.href = checkoutUrl;
       } else {
         throw new Error("Não foi possível gerar o link de pagamento");
@@ -211,7 +226,7 @@ const CartPage = () => {
                         <Button
                           className="w-full rounded-full font-semibold tracking-wide hoverEffect bg-green-600 hover:bg-green-700"
                           size="lg"
-                          disabled={loading}
+                          disabled={loading || !address}
                           onClick={handleCheckout}
                         >
                           {loading ? (
@@ -233,6 +248,43 @@ const CartPage = () => {
                           <p>🔒 Seus dados estão protegidos</p>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Seção de Endereço */}
+                    <div className="mt-5">
+                      {!address ? (
+                        showAddressForm ? (
+                          <AddressForm onAddressSubmit={handleAddressSubmit} />
+                        ) : (
+                          <div className="bg-white rounded-md p-6 border">
+                            <h3 className="text-lg font-semibold mb-4">Endereço de Entrega</h3>
+                            <p className="text-gray-600 mb-4">Você precisa adicionar um endereço de entrega antes de finalizar a compra.</p>
+                            <Button 
+                              onClick={() => setShowAddressForm(true)}
+                              className="w-full"
+                            >
+                              Adicionar Endereço
+                            </Button>
+                          </div>
+                        )
+                      ) : (
+                        <div className="bg-white rounded-md p-6 border">
+                          <h3 className="text-lg font-semibold mb-2">Endereço de Entrega</h3>
+                          <p className="text-gray-700">
+                            {address.street}, {address.number}
+                            {address.complement && `, ${address.complement}`}<br />
+                            {address.city} - {address.state}<br />
+                            CEP: {address.zipCode}
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setShowAddressForm(true)}
+                            className="w-full mt-4"
+                          >
+                            Alterar Endereço
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -263,7 +315,7 @@ const CartPage = () => {
                       <Button
                         className="w-full rounded-full font-semibold tracking-wide hoverEffect bg-green-600 hover:bg-green-700"
                         size="lg"
-                        disabled={loading}
+                        disabled={loading || !address}
                         onClick={handleCheckout}
                       >
                         {loading ? (
