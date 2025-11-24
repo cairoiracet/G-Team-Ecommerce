@@ -24,7 +24,7 @@ Uma aplicação de e-commerce moderna construída com Next.js 15, React, TypeScr
 - MercadoPago (Pagamentos)
 - Zustand (Gerenciamento de estado)
 
-## Developement
+## Development
 Nodejs >= 22
 ```
 npm install
