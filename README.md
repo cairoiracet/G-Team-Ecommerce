@@ -27,6 +27,24 @@ Uma aplicação de e-commerce moderna construída com Next.js 15, React, TypeScr
 * MercadoPago (Pagamentos)
 * Zustand (Gerenciamento de estado)
 
+## 🗺️ Rotas da Aplicação
+Abaixo estão as principais rotas da aplicação e suas funcionalidades:
+
+/	Página principal do app (home)
+
+/shop	Loja de produtos
+
+/cart	Página de pagamentos e resumo do carrinho
+
+/studio	Painel administrativo do Sanity para gerenciamento de estoque
+
+/sobre	Página com explicação sobre a loja
+
+/wishlist	Lista de produtos favoritos
+
+/orders	Lista de pedidos do usuário
+
+
 ## 🔧 Ambiente de Desenvolvimento
 
 ### 📋 **Pré-requisitos**
