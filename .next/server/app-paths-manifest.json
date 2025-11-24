@@ -1,7 +1,0 @@
-{
-  "/(client)/page": "app/(client)/page.js",
-  "/(client)/sobre/page": "app/(client)/sobre/page.js",
-  "/(client)/wishlist/page": "app/(client)/wishlist/page.js",
-  "/(client)/cart/page": "app/(client)/cart/page.js",
-  "/(client)/orders/page": "app/(client)/orders/page.js"
-}
